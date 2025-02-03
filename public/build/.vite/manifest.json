@@ -1,0 +1,33 @@
+{
+  "src/assets/Sentradlogo.png": {
+    "file": "assets/Sentradlogo-DUhD4h_z.png",
+    "src": "src/assets/Sentradlogo.png"
+  },
+  "src/assets/Tari.jpg": {
+    "file": "assets/Tari-buX7OFa6.jpg",
+    "src": "src/assets/Tari.jpg"
+  },
+  "src/assets/pahat.jpg": {
+    "file": "assets/pahat-bixBOdhk.jpg",
+    "src": "src/assets/pahat.jpg"
+  },
+  "src/assets/rupa.jpg": {
+    "file": "assets/rupa-C-iJuai1.jpg",
+    "src": "src/assets/rupa.jpg"
+  },
+  "src/main.js": {
+    "file": "assets/main-CYaNyI2h.js",
+    "name": "main",
+    "src": "src/main.js",
+    "isEntry": true,
+    "css": [
+      "assets/main-kdGKTcuc.css"
+    ],
+    "assets": [
+      "assets/Sentradlogo-DUhD4h_z.png",
+      "assets/pahat-bixBOdhk.jpg",
+      "assets/rupa-C-iJuai1.jpg",
+      "assets/Tari-buX7OFa6.jpg"
+    ]
+  }
+}
