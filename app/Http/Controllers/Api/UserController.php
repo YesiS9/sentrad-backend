@@ -277,91 +277,93 @@ class UserController extends Controller
 
 
     public function update(Request $request, $id)
-    {
-        try {
-            $user = User::whereNull('deleted_at')->find($id);
-            if (!$user) {
-                return response()->json([
-                    'data' => null,
-                    'status' => 'error',
-                    'message' => 'Data User Tidak Ditemukan',
-                ], 404);
-            }
+{
+    try {
+        $user = User::whereNull('deleted_at')->find($id);
+        if (!$user) {
+            return response()->json([
+                'data' => null,
+                'status' => 'error',
+                'message' => 'Data User Tidak Ditemukan',
+            ], 404);
+        }
 
-            $messages = [
-                'username.required' => 'Username wajib diisi.',
-                'username.unique' => 'Username telah dipakai.',
-                'email.required' => 'Email wajib diisi.',
-                'email.unique' => 'Email telah dipakai.',
-                'password.required' => 'Password wajib diisi.',
-                'password.min' => 'Password minimal harus terdiri dari 8 karakter.',
-                'nama_role.required' => 'Role wajib dipilih.',
-                'nama_role.exists' => 'Role yang dipilih tidak valid.',
-                'foto.image' => 'Foto harus berupa file gambar.',
-                'foto.max' => 'Ukuran foto tidak boleh lebih dari 200MB.',
-            ];
+        $messages = [
+            'username.required' => 'Username wajib diisi.',
+            'username.unique' => 'Username telah dipakai.',
+            'email.required' => 'Email wajib diisi.',
+            'email.unique' => 'Email telah dipakai.',
+            'password.min' => 'Password minimal harus terdiri dari 8 karakter.',
+            'nama_role.required' => 'Role wajib dipilih.',
+            'nama_role.exists' => 'Role yang dipilih tidak valid.',
+            'foto.image' => 'Foto harus berupa file gambar.',
+            'foto.max' => 'Ukuran foto tidak boleh lebih dari 200MB.',
+        ];
 
-            $validate = Validator::make($request->all(), [
-                'username' => 'required|string|max:255|unique:users,username,' . $id,
-                'email' => 'required|string|email|max:255|unique:users,email,' . $id,
-                'password' => 'sometimes|nullable|string|min:8',
-                'nama_role' => 'required|string|max:255',
-                'foto' => 'nullable|file|mimes:jpg,jpeg,png|max:204800',
-            ], $messages);
+        $validate = Validator::make($request->all(), [
+            'username' => 'required|string|max:255|unique:users,username,' . $id,
+            'email' => 'required|string|email|max:255|unique:users,email,' . $id,
+            'password' => 'sometimes|nullable|string|min:8',
+            'nama_role' => 'required|string|max:255',
+            'foto' => 'nullable|file|mimes:jpg,jpeg,png|max:204800',
+        ], $messages);
 
-            if ($validate->fails()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => $validate->errors()->first(),
-                ], 422);
-            }
+        if ($validate->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $validate->errors()->first(),
+            ], 422);
+        }
 
-            $user->username = $request->username;
-            $user->email = $request->email;
+        $user->username = $request->username;
+        $user->email = $request->email;
 
-            if ($request->filled('password')) {
-                $user->password = Hash::make($request->password);
-            }
+        if ($request->filled('password')) {
+            $user->password = Hash::make($request->password);
+        }
 
-            $role = Role::where('nama_role', $request->nama_role)->first();
-            if ($role) {
+        $newRole = Role::where('nama_role', $request->nama_role)->first();
+        if ($newRole) {
+            $currentUserRole = UserRole::where('user_id', $user->id)->first();
+            if (!$currentUserRole || $currentUserRole->role_id != $newRole->id) {
                 UserRole::where('user_id', $user->id)->delete();
                 UserRole::create([
                     'user_id' => $user->id,
-                    'role_id' => $role->id,
+                    'role_id' => $newRole->id,
                 ]);
             }
-
-            if ($request->hasFile('foto')) {
-                if ($request->file('foto')->isValid()) {
-                    if ($user->foto && $user->foto !== 'profil_user/user.jpg') {
-                        Storage::disk('public')->delete($user->foto);
-                    }
-
-                    $fotoPath = $request->file('foto')->store('profil_user', 'public');
-                    $user->foto = $fotoPath;
-                }
-            } else {
-                if (is_null($user->foto) || $user->foto === 'profil_user/user.jpg') {
-                    $user->foto = 'profil_user/user.jpg';
-                }
-            }
-
-
-            $user->save();
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Data User berhasil diperbarui',
-                'data' => $user,
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Terjadi kesalahan saat memperbarui data user: ' . $e->getMessage(),
-            ], 500);
         }
+
+        if ($request->hasFile('foto')) {
+            if ($request->file('foto')->isValid()) {
+                if ($user->foto && $user->foto !== 'profil_user/user.jpg') {
+                    Storage::disk('public')->delete($user->foto);
+                }
+
+                $fotoPath = $request->file('foto')->store('profil_user', 'public');
+                $user->foto = $fotoPath;
+            }
+        } else {
+            if (is_null($user->foto) || $user->foto === 'profil_user/user.jpg') {
+                $user->foto = 'profil_user/user.jpg';
+            }
+        }
+
+        $user->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Data User berhasil diperbarui',
+            'data' => $user,
+        ], 200);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Terjadi kesalahan saat memperbarui data user: ' . $e->getMessage(),
+        ], 500);
     }
+}
+
 
 
 
