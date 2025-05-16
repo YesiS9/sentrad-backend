@@ -108,7 +108,7 @@ class PenilaiController extends Controller
                 return response()->json([
                     'data' => null,
                     'status' => 'error',
-                    'message' => 'User already has a Penilai entry',
+                    'message' => 'User telah memiliki data penilai',
                 ], 400);
             }
 
