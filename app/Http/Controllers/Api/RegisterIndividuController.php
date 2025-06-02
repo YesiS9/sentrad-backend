@@ -440,98 +440,81 @@ class RegisterIndividuController extends Controller
             }
 
             if ($register->status_individu !== 'dalam proses') {
-                Log::error('Status individu bukan "dalam proses".');
+                Log::warning('Status individu bukan "dalam proses".');
                 return response()->json([
                     'data' => null,
                     'status' => 'error',
-                    'message' => 'Penilaian registrasi telah selesai sehingga pembaruan data tidak dapat dilakukan.',
+                    'message' => 'Data hanya bisa diubah jika status adalah "dalam proses".',
                 ], 400);
             }
 
-            if (Carbon::now()->diffInHours($register->created_at) > 24) {
-                Log::error('Waktu pembuatan lebih dari 24 jam.');
+            $hoursPassed = Carbon::now()->diffInHours($register->created_at);
+
+            if ($hoursPassed > 24) {
+                $register->status_individu = 'Dalam proses penilaian';
+                $register->save();
+
                 return response()->json([
-                    'data' => null,
+                    'data' => $register,
                     'status' => 'error',
-                    'message' => 'Pembaruan hanya dapat dilakukan jika waktu pendaftaran kurang dari 24 jam.',
+                    'message' => 'Waktu pengajuan telah lewat 24 jam. Status berubah otomatis menjadi "Dalam proses penilaian".',
                 ], 400);
             }
 
             $messages = [
-                'nama_kategori.required' => 'Nama kategori wajib diisi.',
-                'nama_kategori.exists' => 'Nama kategori yang dipilih tidak valid.',
+                'seniman_id.required' => 'Seniman wajib dipilih.',
+                'seniman_id.exists' => 'Seniman tidak valid.',
+                'nama.required' => 'Nama wajib diisi.',
                 'tgl_lahir.required' => 'Tanggal lahir wajib diisi.',
-                'tgl_lahir.date_format' => 'Format tanggal lahir harus sesuai dengan format dd/mm/yyyy.',
-                'tgl_mulai.required' => 'Tanggal mulai berkarya wajib diisi.',
-                'tgl_mulai.date_format' => 'Format tanggal mulai harus sesuai dengan format dd/mm/yyyy.',
+                'tgl_lahir.date_format' => 'Format tanggal lahir harus dd/mm/yyyy.',
+                'tgl_mulai.required' => 'Tanggal mulai wajib diisi.',
+                'tgl_mulai.date_format' => 'Format tanggal mulai harus dd/mm/yyyy.',
                 'alamat.required' => 'Alamat wajib diisi.',
-                'noTelp.required' => 'Nomor telepon wajib diisi.',
-                'noTelp.regex' => 'Nomor telepon harus dimulai dengan 08 dan terdiri dari 9 hingga 13 digit.',
-                'email.required' => 'Email wajib diisi.',
-                'email.email' => 'Format email tidak valid.',
-                'status_individu.required' => 'Status individu wajib diisi.',
             ];
 
-            $validate = Validator::make($request->all(), [
-                'nama_kategori' => 'required|exists:kategori_senis,nama_kategori',
+            $validator = Validator::make($request->all(), [
+                'seniman_id' => 'required|exists:seniman,id',
                 'nama' => 'required',
                 'tgl_lahir' => 'required|date_format:d/m/Y',
                 'tgl_mulai' => 'required|date_format:d/m/Y',
                 'alamat' => 'required',
-                'noTelp' => 'required|regex:/^08\d{8,12}$/',
-                'email' => 'required|email',
-                'status_individu' => 'required',
             ], $messages);
 
-            if ($validate->fails()) {
-                Log::error('Validation error: ' . $validate->errors());
+            if ($validator->fails()) {
+                Log::warning('Validasi gagal: ', $validator->errors()->toArray());
                 return response()->json([
                     'data' => null,
                     'status' => 'error',
-                    'message' => $validate->errors(),
+                    'message' => $validator->errors(),
                 ], 400);
             }
 
-            $kategori = KategoriSeni::where('nama_kategori', $request->nama_kategori)->first();
-            if (!$kategori) {
-                Log::error('Kategori Seni tidak ditemukan dengan nama_kategori: ' . $request->nama_kategori);
-                return response()->json([
-                    'data' => null,
-                    'status' => 'error',
-                    'message' => 'Kategori Seni tidak ditemukan',
-                ], 404);
-            }
+            $tgl_lahir = Carbon::createFromFormat('d/m/Y', $request->tgl_lahir)->format('Y-m-d');
+            $tgl_mulai = Carbon::createFromFormat('d/m/Y', $request->tgl_mulai)->format('Y-m-d');
 
-            $register->kategori_id = $kategori->id;
-            $register->tgl_lahir = Carbon::createFromFormat('d/m/Y', $request->tgl_lahir)->format('Y-m-d');
-            $register->tgl_mulai = Carbon::createFromFormat('d/m/Y', $request->tgl_mulai)->format('Y-m-d');
-
-
-            $register->nama = $request->input('nama', $register->nama);
-            $register->alamat = $request->input('alamat', $register->alamat);
-            $register->noTelp = $request->input('noTelp', $register->noTelp);
-            $register->email = $request->input('email', $register->email);
-            $register->status_individu = $request->input('status_individu', $register->status_individu);
+            $register->seniman_id = $request->seniman_id;
+            $register->nama = $request->nama;
+            $register->tgl_lahir = $tgl_lahir;
+            $register->tgl_mulai = $tgl_mulai;
+            $register->alamat = $request->alamat;
 
             $register->save();
 
-            Log::info('Data Registrasi Individu Berhasil Diperbarui');
             return response()->json([
                 'data' => $register,
                 'status' => 'success',
-                'message' => 'Data Registrasi Individu Berhasil Diperbarui',
+                'message' => 'Data Registrasi Individu Berhasil Diupdate',
             ], 200);
+
         } catch (\Exception $e) {
             Log::error('Exception Error: ' . $e->getMessage());
             return response()->json([
                 'data' => null,
                 'status' => 'error',
-                'message' => $e->getMessage()
+                'message' => 'Terjadi kesalahan server: ' . $e->getMessage(),
             ], 500);
         }
     }
-
-
 
 
     public function updateByAdmin(Request $request, $id)
