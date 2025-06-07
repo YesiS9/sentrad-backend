@@ -17,12 +17,16 @@ RUN apt-get update && apt-get install -y \
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-RUN composer install --no-dev --optimize-autoloader
-
 # Set working directory
 WORKDIR /var/www/html
 
-# Salin semua file project Laravel ke dalam container
+# Salin composer.json dan composer.lock terlebih dahulu
+COPY composer.json composer.lock ./
+
+# Jalankan composer install
+RUN composer install --no-dev --optimize-autoloader
+
+# Baru salin semua file project Laravel lainnya
 COPY . .
 
 # Copy konfigurasi virtualhost Apache
@@ -32,7 +36,6 @@ COPY ./docker/vhost.conf /etc/apache2/sites-available/000-default.conf
 RUN a2enmod rewrite
 
 # Tambahkan cron job untuk schedule Laravel
-# Jalankan schedule setiap jam
 RUN echo "0 * * * * cd /var/www/html && php artisan schedule:run >> /dev/null 2>&1" > /etc/cron.d/laravel-schedule
 
 # Set permission dan berikan executable permission ke cron job
