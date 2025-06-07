@@ -5,6 +5,12 @@ namespace App\Console;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
+use App\Models\RegistrasiKelompok;
+use App\Models\RegistrasiIndividu;
+use App\Models\Penilai;
+use App\Models\KuotaPenilaian;
+use Carbon\Carbon;
+
 class Kernel extends ConsoleKernel
 {
     /**
@@ -32,6 +38,28 @@ class Kernel extends ConsoleKernel
                 }
             }
         })->monthlyOn(1, '00:00');
+
+        $schedule->call(function () {
+            $kelompoks = RegistrasiKelompok::where('status_kelompok', 'Pengajuan Pendaftaran')
+                ->where('created_at', '<=', Carbon::now()->subHours(24))
+                ->get();
+
+            foreach ($kelompoks as $kelompok) {
+                $kelompok->status_kelompok = 'Dalam proses penilaian';
+                $kelompok->save();
+            }
+        })->hourly();
+
+        $schedule->call(function () {
+            $individus = RegistrasiIndividu::where('status_individu', 'Pengajuan Pendaftaran')
+                ->where('created_at', '<=', Carbon::now()->subHours(24))
+                ->get();
+
+            foreach ($individus as $individu) {
+                $individu->status_individu = 'Dalam proses penilaian';
+                $individu->save();
+            }
+        })->hourly();
     }
 
 

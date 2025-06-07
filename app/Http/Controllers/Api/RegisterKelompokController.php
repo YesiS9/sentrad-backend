@@ -246,9 +246,6 @@ class RegisterKelompokController extends Controller
         }
     }
 
-
-
-
     public function storebyAdmin(Request $request)
     {
         try {
@@ -340,7 +337,8 @@ class RegisterKelompokController extends Controller
     }
 
 
-    public function show($id){
+    public function show($id)
+    {
         try {
             $register = RegistrasiKelompok::with('kategoriSeni')->where('id', $id)->whereNull('deleted_at')->find($id);
             if (!$register) {
@@ -411,8 +409,6 @@ class RegisterKelompokController extends Controller
         }
     }
 
-
-
     public function update(Request $request, $id)
     {
         try {
@@ -436,11 +432,9 @@ class RegisterKelompokController extends Controller
                 ], 400);
             }
 
-            // Hitung durasi sejak pendaftaran
             $hoursPassed = Carbon::now()->diffInHours($register->created_at);
 
             if ($hoursPassed > 24) {
-                // Ubah status otomatis jika lebih dari 24 jam
                 $register->status_kelompok = 'Dalam proses penilaian';
                 $register->save();
 
@@ -451,7 +445,6 @@ class RegisterKelompokController extends Controller
                 ], 400);
             }
 
-            // Validasi input
             $messages = [
                 'nama_kategori.required' => 'Nama kategori wajib diisi.',
                 'nama_kategori.exists' => 'Nama kategori yang dipilih tidak valid.',
@@ -617,14 +610,8 @@ class RegisterKelompokController extends Controller
         }
     }
 
-
-
-
-
-   
-
-
-    public function destroy($id){
+    public function destroy($id)
+    {
         try {
             $register = RegistrasiKelompok::whereNull('deleted_at')->find($id);
 

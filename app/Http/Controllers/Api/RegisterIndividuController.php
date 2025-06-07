@@ -439,12 +439,12 @@ class RegisterIndividuController extends Controller
                 ], 404);
             }
 
-            if ($register->status_individu !== 'dalam proses') {
-                Log::warning('Status individu bukan "dalam proses".');
+            if ($register->status_individu !== 'Pengajuan pendaftaran') {
+                Log::warning('Status individu bukan "Pengajuan pendaftaran".');
                 return response()->json([
                     'data' => null,
                     'status' => 'error',
-                    'message' => 'Data hanya bisa diubah jika status adalah "dalam proses".',
+                    'message' => 'Data hanya bisa diubah jika status adalah "Pengajuan pendaftaran".',
                 ], 400);
             }
 
