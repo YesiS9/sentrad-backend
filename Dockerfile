@@ -20,14 +20,11 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www/html
 
-# Salin composer.json dan composer.lock terlebih dahulu
-COPY composer.json composer.lock ./
-
-# Jalankan composer install
-RUN composer install --no-dev --optimize-autoloader
-
-# Baru salin semua file project Laravel lainnya
+# Salin SELURUH file Laravel dulu (supaya artisan tersedia saat composer install)
 COPY . .
+
+# Jalankan composer install setelah semua file tersedia
+RUN composer install --no-dev --optimize-autoloader
 
 # Copy konfigurasi virtualhost Apache
 COPY ./docker/vhost.conf /etc/apache2/sites-available/000-default.conf
