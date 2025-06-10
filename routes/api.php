@@ -32,14 +32,15 @@ use Laravel\Passport\Passport;
 Passport::routes();
 Route::get('hash', [AuthController::class,'hash']);
 Route::post('register', [AuthController::class, 'register']);
-Route::post('login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])->middleware('cors');
 Route::get('email/verify/{id}', [AuthController::class, 'verifyEmail'])->name('verification.verify');
 Route::get('/roles', [AuthController::class, 'getRoles']);
 
 Route::post('seniman', [SenimanController::class, 'store']);
 Route::get('/map-sanggar', [MapController::class, 'indexAll']);
 
-Route::middleware('auth:api')->group(function () {
+Route::middleware('cors', 'auth:api')->group(function () {
+    dd(config('cors'));
     Route::apiResource('penilai', PenilaiController::class);
     Route::apiResource('forum', ForumController::class);
     Route::apiResource('proyek', ProyekController::class);
