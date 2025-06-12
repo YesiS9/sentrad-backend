@@ -106,6 +106,7 @@ class AuthController extends Controller{
 
     public function login(Request $request)
     {
+        \Log::info('Login request', request()->all());
         $request->validate([
             'email' => 'required|exists:users,email',
             'password' => 'required'
