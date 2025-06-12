@@ -32,7 +32,7 @@ use Laravel\Passport\Passport;
 Passport::routes();
 Route::get('hash', [AuthController::class,'hash']);
 Route::post('register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login'])->middleware('cors');
+Route::post('/login', [AuthController::class, 'login']);
 Route::get('email/verify/{id}', [AuthController::class, 'verifyEmail'])->name('verification.verify');
 Route::get('/roles', [AuthController::class, 'getRoles']);
 
