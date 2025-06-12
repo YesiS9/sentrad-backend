@@ -17,7 +17,7 @@ return [
 
     'paths' => ['api/*', 'login'],
 
-    'allowed_methods' => ['POST', 'GET', 'OPTIONS', 'PUT', 'DELETE'],
+    'allowed_methods' => ['*'],
 
     'allowed_origins' => ['https://sentrad-git-master-yesis-projects-c3bd1885.vercel.app', 'http://localhost:5173'],
 
