@@ -23,8 +23,15 @@ WORKDIR /var/www/html
 # Salin SELURUH file Laravel dulu (supaya artisan tersedia saat composer install)
 COPY . .
 
-# Jalankan composer install setelah semua file tersedia
+# Jalankan composer install
 RUN composer install --no-dev --optimize-autoloader
+
+# Jalankan perintah Laravel build
+RUN php artisan config:clear \
+    && php artisan cache:clear \
+    && php artisan route:clear \
+    && php artisan view:clear \
+    && php artisan storage:link
 
 # Copy konfigurasi virtualhost Apache
 COPY ./docker/vhost.conf /etc/apache2/sites-available/000-default.conf
