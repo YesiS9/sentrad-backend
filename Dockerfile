@@ -49,3 +49,5 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # Gunakan entrypoint script saat container dijalankan
 CMD ["/usr/local/bin/entrypoint.sh"]
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
