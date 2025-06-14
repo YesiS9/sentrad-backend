@@ -20,34 +20,26 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www/html
 
-# Salin SELURUH file Laravel dulu (supaya artisan tersedia saat composer install)
+# Salin seluruh file proyek Laravel
 COPY . .
 
-# Jalankan composer install setelah semua file tersedia
+# Install dependensi Laravel (tanpa dev)
 RUN composer install --no-dev --optimize-autoloader
 
-# Copy konfigurasi virtualhost Apache
+# Salin konfigurasi Apache virtual host
 COPY ./docker/vhost.conf /etc/apache2/sites-available/000-default.conf
 
-# Aktifkan mod_rewrite Laravel
+# Aktifkan mod_rewrite
 RUN a2enmod rewrite
 
-# Tambahkan cron job untuk schedule Laravel
-RUN echo "* * * * * cd /var/www/html && php artisan schedule:run >> /dev/null 2>&1" > /etc/cron.d/laravel-schedule
+# Tambahkan cron job Laravel schedule
+RUN echo "* * * * * cd /var/www/html && php artisan schedule:run >> /dev/null 2>&1" > /etc/cron.d/laravel-schedule \
+    && chmod 0644 /etc/cron.d/laravel-schedule \
+    && crontab /etc/cron.d/laravel-schedule
 
-# Set permission dan berikan executable permission ke cron job
-RUN chmod 0644 /etc/cron.d/laravel-schedule
-
-# Apply cron job
-RUN crontab /etc/cron.d/laravel-schedule
-
-# Salin entrypoint.sh dari root project ke container
+# Salin entrypoint.sh dan beri izin eksekusi
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
-
-# Berikan hak eksekusi pada entrypoint
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
-# Gunakan entrypoint script saat container dijalankan
-CMD ["/usr/local/bin/entrypoint.sh"]
-
+# Jalankan entrypoint script saat container dijalankan
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
