@@ -1,22 +1,24 @@
 #!/bin/bash
+set -e  # Stop script jika ada error
+set -x  # Tampilkan semua perintah yang dijalankan (debug log di Railway)
 
-echo
-
-# Start cron
-echo
+echo "🔄 Menjalankan cron..."
 service cron start
 
-# Jalankan perintah Laravel
-echo
-php artisan config:clear
-php artisan cache:clear
-php artisan route:clear
-php artisan view:clear
+echo "🧼 Membersihkan cache Laravel..."
+php artisan config:clear || true
+php artisan cache:clear || true
+php artisan route:clear || true
+php artisan view:clear || true
+
+echo "🔗 Menjalankan storage:link..."
 php artisan storage:link || true
 
-# Jalankan migration jika perlu (opsional)
-# php artisan migrate --force
+# Optional: generate key jika belum ada
+if [ ! -f .env ] || ! grep -q "APP_KEY=" .env; then
+  echo "🔑 APP_KEY belum diset, generate key..."
+  php artisan key:generate || true
+fi
 
-# Jalankan Apache
-echo "🌐 Menjalankan Apache server..."
+echo "🚀 Menjalankan Apache server..."
 exec apache2-foreground
