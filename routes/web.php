@@ -18,19 +18,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/debug-migrate-status', function () {
-    try {
-        Artisan::call('migrate:status');
-        return nl2br(Artisan::output());
-    } catch (\Exception $e) {
-        return 'Error: ' . $e->getMessage();
-    }
-});
-
-Auth::routes();
-
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-
 Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
