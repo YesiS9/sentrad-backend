@@ -27,9 +27,9 @@ use App\Http\Controllers\Api\ChartController;
 use App\Http\Controllers\Api\LaporanController;
 use App\Http\Controllers\Api\InfoController;
 use App\Http\Controllers\Api\NotificationController;
-use Laravel\Passport\Passport;
 
-Passport::routes();
+
+
 Route::get('hash', [AuthController::class,'hash']);
 Route::post('register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
