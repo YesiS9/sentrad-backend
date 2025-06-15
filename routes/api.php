@@ -108,7 +108,7 @@ Route::middleware('cors', 'auth:api')->group(function () {
     Route::get('/laporan/download-pdf', [LaporanController::class, 'downloadLaporanData']);
     Route::get('/laporan/preview-pdf', [LaporanController::class, 'previewLaporanData']);
     Route::get('/show-byregis/{id}', [PenilaianKaryaController::class, 'showByRegistrationId']);
-    Route::get('/notifikasi/unread', [NotificationController::class, 'unreadCount']);
+    // Route::get('/notifikasi/unread', [NotificationController::class, 'unreadCount']);
 
     Route::get('/user-profile', function (Request $request) {
         return $request->user();
