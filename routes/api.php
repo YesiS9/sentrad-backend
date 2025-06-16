@@ -39,7 +39,7 @@ Route::get('/roles', [AuthController::class, 'getRoles']);
 Route::post('seniman', [SenimanController::class, 'store']);
 Route::get('/map-sanggar', [MapController::class, 'indexAll']);
 
-Route::middleware('cors', 'auth:api')->group(function () {
+Route::middleware('auth:api')->group(function () {
     Route::apiResource('penilai', PenilaiController::class);
     Route::apiResource('forum', ForumController::class);
     Route::apiResource('proyek', ProyekController::class);
