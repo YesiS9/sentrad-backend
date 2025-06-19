@@ -27,6 +27,7 @@ use App\Http\Controllers\Api\ChartController;
 use App\Http\Controllers\Api\LaporanController;
 use App\Http\Controllers\Api\InfoController;
 use App\Http\Controllers\Api\NotificationController;
+use Illuminate\Support\Facades\Artisan;
 
 
 
@@ -35,6 +36,14 @@ Route::post('register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('email/verify/{id}', [AuthController::class, 'verifyEmail'])->name('verification.verify');
 Route::get('/roles', [AuthController::class, 'getRoles']);
+Route::get('/run-scheduler', function (Request $request) {
+    if ($request->header('X-Secret-Key') !== env('SCHEDULER_SECRET')) {
+        abort(403, 'Unauthorized');
+    }
+
+    Artisan::call('schedule:run');
+    return response()->json(['message' => 'Scheduler executed']);
+});
 
 Route::post('seniman', [SenimanController::class, 'store']);
 Route::get('/map-sanggar', [MapController::class, 'indexAll']);
