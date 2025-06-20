@@ -72,7 +72,7 @@ class RegisterKelompokController extends Controller
                 ], 404);
             }
 
-            $register = RegistrasiKelompok::where('status_kelompok', 'Dalam proses')
+            $register = RegistrasiKelompok::where('status_kelompok', 'Dalam Proses Penilaian')
                 ->whereNull('deleted_at')
                 ->whereHas('seniman', function ($query) use ($kategoriIdPenilai) {
                     $query->where('kategori_id', $kategoriIdPenilai);

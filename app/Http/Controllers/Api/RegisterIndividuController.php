@@ -142,7 +142,7 @@ class RegisterIndividuController extends Controller
                 ], 404);
             }
 
-            $register = RegistrasiIndividu::where('status_individu', 'Dalam proses')
+            $register = RegistrasiIndividu::where('status_individu', 'Dalam Proses Penilaian')
                 ->whereNull('deleted_at')
                 ->whereHas('seniman', function ($query) use ($kategoriIdPenilai) {
                     $query->where('kategori_id', $kategoriIdPenilai);
