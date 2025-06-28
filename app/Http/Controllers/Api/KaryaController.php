@@ -341,4 +341,3 @@ class KaryaController extends Controller
         Portofolio::find($portofolioId)->update(['jumlah_karya' => $jumlahKarya]);
     }
 }
-
