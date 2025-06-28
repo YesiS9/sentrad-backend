@@ -16,10 +16,9 @@ class KaryaController extends Controller
     public function index($portofolio_id)
     {
         try {
-            Log::info('Received portofolio_id: ' . $portofolio_id);
+            \Log::info('Received portofolio_id: ' . $portofolio_id);
 
             if (!$portofolio_id) {
-                Log::info('portofolio_id is required but not provided');
                 return response()->json([
                     'data' => null,
                     'status' => 'error',
@@ -27,28 +26,48 @@ class KaryaController extends Controller
                 ], 400);
             }
 
-
             $karyas = Karya::whereNull('deleted_at')
                         ->where('portofolio_id', $portofolio_id)
+                        ->with('portofolio:id,judul_portofolio')
                         ->get();
 
-            if ($karyas->isNotEmpty()) {
-                Log::info('Data Karya Berhasil Ditampilkan');
+            if ($karyas->isEmpty()) {
+                \Log::info('Data Karya Kosong');
                 return response()->json([
-                    'data' => $karyas,
+                    'data' => null,
                     'status' => 'success',
-                    'message' => 'Data Karya Berhasil Ditampilkan',
+                    'message' => 'Data Karya Kosong',
                 ], 200);
             }
 
-            Log::info('Data Karya Kosong');
+            $baseUrl = config('app.url');
+
+            $data = $karyas->map(function ($item) use ($baseUrl) {
+                $mediaPaths = json_decode($item->media_karya, true) ?? [];
+                $fullMediaUrls = array_map(function ($path) use ($baseUrl) {
+                    return $baseUrl . '/storage/' . $path;
+                }, $mediaPaths);
+
+                return [
+                    'id' => $item->id,
+                    'judul_karya' => $item->judul_karya,
+                    'deskripsi_karya' => $item->deskripsi_karya,
+                    'tgl_pembuatan' => $item->tgl_pembuatan,
+                    'media_karya' => $fullMediaUrls,
+                    'bentuk_karya' => $item->bentuk_karya,
+                    'status_karya' => $item->status_karya,
+                    'judul_portofolio' => $item->portofolio ? $item->portofolio->judul_portofolio : 'Portofolio tidak tersedia',
+                ];
+            });
+
+            \Log::info('Data Karya Berhasil Ditampilkan');
             return response()->json([
-                'data' => null,
+                'data' => $data,
                 'status' => 'success',
-                'message' => 'Data Karya Kosong',
+                'message' => 'Data Karya Berhasil Ditampilkan',
             ], 200);
         } catch (\Exception $e) {
-            Log::error('Exception Error: ' . $e->getMessage());
+            \Log::error('Exception Error: ' . $e->getMessage());
             return response()->json([
                 'data' => null,
                 'status' => 'error',
@@ -56,7 +75,6 @@ class KaryaController extends Controller
             ], 500);
         }
     }
-
 
 
     public function store(Request $request)
@@ -258,12 +276,21 @@ class KaryaController extends Controller
 
             $judul_portofolio = $karya->portofolio ? $karya->portofolio->judul_portofolio : 'Portofolio tidak tersedia';
 
+            $mediaPaths = json_decode($karya->media_karya, true);
+            $fullMediaUrls = [];
+
+            if ($mediaPaths) {
+                foreach ($mediaPaths as $path) {
+                    $fullMediaUrls[] = config('app.url') . '/storage/' . $path;
+                }
+            }
+
             $data = [
                 'id' => $karya->id,
                 'judul_karya' => $karya->judul_karya,
                 'deskripsi_karya' => $karya->deskripsi_karya,
                 'tgl_pembuatan' => $karya->tgl_pembuatan,
-                'media_karya' => $karya->media_karya,
+                'media_karya' => $fullMediaUrls,
                 'bentuk_karya' => $karya->bentuk_karya,
                 'status_karya' => $karya->status_karya,
                 'judul_portofolio' => $judul_portofolio,
@@ -275,7 +302,7 @@ class KaryaController extends Controller
                 'message' => 'Data Karya Berhasil Ditampilkan',
             ], 200);
         } catch (\Exception $e) {
-            Log::error('Exception Error: ' . $e->getMessage());
+            \Log::error('Exception Error: ' . $e->getMessage());
             return response()->json([
                 'data' => null,
                 'status' => 'error',
@@ -283,7 +310,6 @@ class KaryaController extends Controller
             ], 500);
         }
     }
-
 
 
     public function destroy($id)
