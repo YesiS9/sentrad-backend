@@ -244,45 +244,47 @@ class KaryaController extends Controller
     }
 
     public function show($id)
-    {
-        try {
-            $karya = Karya::with('portofolio:id,judul_portofolio')->whereNull('deleted_at')->find($id);
+{
+    try {
+        $karya = Karya::with('portofolio:id,judul_portofolio')->whereNull('deleted_at')->find($id);
 
-            if (!$karya) {
-                return response()->json([
-                    'data' => null,
-                    'status' => 'error',
-                    'message' => 'Data Karya tidak ditemukan',
-                ], 404);
-            }
-
-            $judul_portofolio = $karya->portofolio ? $karya->portofolio->judul_portofolio : 'Portofolio tidak tersedia';
-
-            $data = [
-                'id' => $karya->id,
-                'judul_karya' => $karya->judul_karya,
-                'deskripsi_karya' => $karya->deskripsi_karya,
-                'tgl_pembuatan' => $karya->tgl_pembuatan,
-                'media_karya' => $karya->media_karya,
-                'bentuk_karya' => $karya->bentuk_karya,
-                'status_karya' => $karya->status_karya,
-                'judul_portofolio' => $judul_portofolio,
-            ];
-
-            return response()->json([
-                'data' => $data,
-                'status' => 'success',
-                'message' => 'Data Karya Berhasil Ditampilkan',
-            ], 200);
-        } catch (\Exception $e) {
-            Log::error('Exception Error: ' . $e->getMessage());
+        if (!$karya) {
             return response()->json([
                 'data' => null,
                 'status' => 'error',
-                'message' => $e->getMessage()
-            ], 500);
+                'message' => 'Data Karya tidak ditemukan',
+            ], 404);
         }
+
+        $judul_portofolio = $karya->portofolio ? $karya->portofolio->judul_portofolio : 'Portofolio tidak tersedia';
+
+        $data = [
+            'id' => $karya->id,
+            'judul_karya' => $karya->judul_karya,
+            'deskripsi_karya' => $karya->deskripsi_karya,
+            'tgl_pembuatan' => $karya->tgl_pembuatan,
+            'media_karya' => $karya->media_karya,
+            'bentuk_karya' => $karya->bentuk_karya,
+            'status_karya' => $karya->status_karya,
+            'judul_portofolio' => $judul_portofolio,
+            'portofolio_id' => $karya->portofolio_id,
+        ];
+
+        return response()->json([
+            'data' => $data,
+            'status' => 'success',
+            'message' => 'Data Karya Berhasil Ditampilkan',
+        ], 200);
+    } catch (\Exception $e) {
+        Log::error('Exception Error: ' . $e->getMessage());
+        return response()->json([
+            'data' => null,
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ], 500);
     }
+}
+
 
 
 
