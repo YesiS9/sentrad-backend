@@ -23,6 +23,42 @@ class UserRoleSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+            [
+
+                'id' => 'fed7482c-96ff-11ef-8df1-3822e23dbac4',
+                'user_id' => 'b3c45678-96ff-11ef-8df1-3822e23dbac4',
+                'role_id' => 'bb330861-96ff-11ef-8df1-3822e23dbac4',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'id' => 'fed7483c-96ff-11ef-8df1-3822e23dbac4',
+                'user_id' => 'c4d56789-96ff-11ef-8df1-3822e23dbac4',
+                'role_id' => 'bb330861-96ff-11ef-8df1-3822e23dbac4',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'id' => 'fed7484c-96ff-11ef-8df1-3822e23dbac4',
+                'user_id' => 'd5e67890-96ff-11ef-8df1-3822e23dbac4',
+                'role_id' => 'bb32fc47-96ff-11ef-8df1-3822e23dbac4',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'id' => 'fed7485c-96ff-11ef-8df1-3822e23dbac4',
+                'user_id' => 'e6f78901-96ff-11ef-8df1-3822e23dbac4',
+                'role_id' => 'bb32fc47-96ff-11ef-8df1-3822e23dbac4',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'id' => 'fed7486c-96ff-11ef-8df1-3822e23dbac4',
+                'user_id' => 'f7g89012-96ff-11ef-8df1-3822e23dbac4',
+                'role_id' => 'bb32fc47-96ff-11ef-8df1-3822e23dbac4',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
         ]);
     }
 }
