@@ -20,6 +20,8 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             UserRoleSeeder::class,
             SenimanSeeder::class,
+            PenilaiSeeder::class,
+            SeniSeeder::class,
         ]);
 
     }
