@@ -40,7 +40,7 @@ class SeniSeeder extends Seeder
         ];
 
         foreach ($data as $item) {
-            DB::table('seni')->updateOrInsert(
+            DB::table('senis')->updateOrInsert(
                 ['id' => $item['id']],
                 array_merge($item, [
                     'created_at' => now(),

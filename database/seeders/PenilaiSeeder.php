@@ -58,7 +58,7 @@ class PenilaiSeeder extends Seeder
         ];
 
         foreach ($penilai as $item) {
-            DB::table('penilai')->updateOrInsert(
+            DB::table('penilais')->updateOrInsert(
                 ['id' => $item['id']],
                 array_merge($item, [
                     'created_at' => now(),
