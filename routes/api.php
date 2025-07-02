@@ -98,7 +98,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/registerIndividu/storeByAdmin', [RegisterIndividuController::class, 'storebyAdmin']);
     Route::post('/registerKelompok/storeByAdmin', [RegisterKelompokController::class, 'storebyAdmin']);
     Route::put('/registerIndividu/updateByAdmin/{id}', [RegisterIndividuController::class, 'updateByAdmin']);
-    Route::put('/registerKelompok/storeByAdmin/{id}', [RegisterKelompokController::class, 'updateByAdmin']);
+    Route::put('/registerKelompok/updateByAdmin/{id}', [RegisterKelompokController::class, 'updateByAdmin']);
     Route::get('/registerIndividuUser', [RegisterIndividuController::class, 'getRegistrasiIndividu']);
     Route::get('/registerKelompokUser', [RegisterKelompokController::class, 'getRegistrasiKelompok']);
     Route::get('/registerIndividuPenilai/{penilai_id}', [RegisterIndividuController::class, 'indexForPenilai']);
