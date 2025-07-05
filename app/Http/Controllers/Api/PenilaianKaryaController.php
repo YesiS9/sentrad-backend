@@ -111,30 +111,40 @@ class PenilaianKaryaController extends Controller
                 'rubrik_penilaians.*.skor.required' => 'Skor pada setiap rubrik wajib diisi.',
                 'rubrik_penilaians.*.skor.numeric' => 'Skor pada setiap rubrik harus berupa angka.',
                 'rubrik_penilaians.*.skor.min' => 'Skor pada setiap rubrik harus minimal 0.',
-                'rubrik_penilaians.*.skor.max' => 'Skor pada setiap rubrik tidak boleh lebih dari 100.',
                 'komentar.string' => 'Komentar harus berupa teks.',
                 'komentar.max' => 'Komentar tidak boleh lebih dari 500 karakter.',
             ];
+
             $validated = $request->validate([
                 'kuota_id' => 'required|exists:kuota_penilais,id',
                 'regisIndividu_id' => 'nullable|exists:registrasi_individus,id',
                 'regisKelompok_id' => 'nullable|exists:registrasi_kelompoks,id',
                 'rubrik_penilaians' => 'required|array|min:5',
                 'rubrik_penilaians.*.nama_rubrik' => 'required|exists:rubriks,nama_rubrik',
-                'rubrik_penilaians.*.skor' => 'required|numeric|min:0|max:100',
+                'rubrik_penilaians.*.skor' => 'required|numeric|min:0',
                 'komentar' => 'nullable|string|max:500',
             ], $messages);
 
-            if ($validate->fails()) {
-                Log::error('Validation error: ' . $validate->errors());
-                return response()->json([
-                    'data' => null,
-                    'status' => 'error',
-                    'message' => $validate->errors(),
-                ], 400);
+            $total_skor = 0;
+            $total_bobot = 0;
+
+            foreach ($validated['rubrik_penilaians'] as $rubrik) {
+                $rubrikModel = Rubrik::where('nama_rubrik', $rubrik['nama_rubrik'])->first();
+
+                if (!$rubrikModel) {
+                    return response()->json(['error' => 'Rubrik tidak ditemukan.'], 400);
+                }
+
+                $bobot = $rubrikModel->bobot ?? 1; // Default bobot = 1 jika null
+                $total_skor += $rubrik['skor'];
+                $total_bobot += $bobot;
             }
 
-            $total_nilai = array_sum(array_column($validated['rubrik_penilaians'], 'skor'));
+            if ($total_bobot <= 0) {
+                return response()->json(['error' => 'Total bobot tidak boleh 0.'], 400);
+            }
+
+            $total_nilai = ($total_skor / $total_bobot) * 100;
 
             $penilai = Penilai::find($validated['kuota_id']);
             $kuotaPenilai = KuotaPenilai::find($validated['kuota_id']);
@@ -173,6 +183,7 @@ class PenilaianKaryaController extends Controller
             }
 
             $kuotaPenilai->increment('kuota_terpakai');
+
             if ($validated['regisIndividu_id']) {
                 $registrasiIndividu = RegistrasiIndividu::find($validated['regisIndividu_id']);
                 $registrasiIndividu->update(['status_individu' => 'Penilaian Selesai']);
@@ -193,12 +204,14 @@ class PenilaianKaryaController extends Controller
                 'message' => 'Data has been saved successfully.',
                 'data' => $penilaianKarya,
             ], 200);
+
         } catch (\Illuminate\Database\QueryException $e) {
             return response()->json(['error' => 'Database error: ' . $e->getMessage()], 500);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Error: ' . $e->getMessage()], 500);
         }
     }
+
 
 
     public function update(Request $request, $id)
@@ -211,27 +224,37 @@ class PenilaianKaryaController extends Controller
                 'rubrik_penilaians.*.skor.required' => 'Skor pada setiap rubrik wajib diisi.',
                 'rubrik_penilaians.*.skor.numeric' => 'Skor pada setiap rubrik harus berupa angka.',
                 'rubrik_penilaians.*.skor.min' => 'Skor pada setiap rubrik harus minimal 0.',
-                'rubrik_penilaians.*.skor.max' => 'Skor pada setiap rubrik tidak boleh lebih dari 100.',
                 'komentar.string' => 'Komentar harus berupa teks.',
                 'komentar.max' => 'Komentar tidak boleh lebih dari 500 karakter.',
             ];
+
             $validated = $request->validate([
                 'rubrik_penilaians' => 'required|array|min:5',
                 'rubrik_penilaians.*.nama_rubrik' => 'required|exists:rubriks,nama_rubrik',
-                'rubrik_penilaians.*.skor' => 'required|numeric|min:0|max:100',
+                'rubrik_penilaians.*.skor' => 'required|numeric|min:0',
                 'komentar' => 'nullable|string|max:500',
             ], $messages);
 
-            if ($validate->fails()) {
-                Log::error('Validation error: ' . $validate->errors());
-                return response()->json([
-                    'data' => null,
-                    'status' => 'error',
-                    'message' => $validate->errors(),
-                ], 400);
+            $total_skor = 0;
+            $total_bobot = 0;
+
+            foreach ($validated['rubrik_penilaians'] as $rubrik) {
+                $rubrikModel = Rubrik::where('nama_rubrik', $rubrik['nama_rubrik'])->first();
+
+                if (!$rubrikModel) {
+                    return response()->json(['error' => 'Rubrik tidak ditemukan.'], 400);
+                }
+
+                $bobot = $rubrikModel->bobot ?? 1;
+                $total_skor += $rubrik['skor'];
+                $total_bobot += $bobot;
             }
 
-            $total_nilai = array_sum(array_column($validated['rubrik_penilaians'], 'skor'));
+            if ($total_bobot <= 0) {
+                return response()->json(['error' => 'Total bobot tidak boleh 0.'], 400);
+            }
+
+            $total_nilai = ($total_skor / $total_bobot) * 100;
 
             $penilaianKarya = PenilaianKarya::findOrFail($id);
 
@@ -241,22 +264,23 @@ class PenilaianKaryaController extends Controller
                 'tgl_penilaian' => now(),
             ]);
 
+            // Update rubrik penilaian
             foreach ($validated['rubrik_penilaians'] as $rubrikData) {
-                $rubrikId = DB::table('rubriks')
-                    ->where('nama_rubrik', $rubrikData['nama_rubrik'])
-                    ->value('id');
+                $rubrikId = Rubrik::where('nama_rubrik', $rubrikData['nama_rubrik'])->value('id');
 
-                $rubrikPenilaian = RubrikPenilaian::where('penilaian_karya_id', $id)
-                    ->where('rubrik_id', $rubrikId)
-                    ->first();
+                if ($rubrikId) {
+                    $rubrikPenilaian = RubrikPenilaian::where('penilaian_karya_id', $id)
+                        ->where('rubrik_id', $rubrikId)
+                        ->first();
 
-                if ($rubrikPenilaian) {
-                    $rubrikPenilaian->update(['skor' => $rubrikData['skor']]);
+                    if ($rubrikPenilaian) {
+                        $rubrikPenilaian->update(['skor' => $rubrikData['skor']]);
+                    }
                 }
             }
 
-            $tingkatan = DB::table('tingkatans')
-                ->where('nilai_min', '<=', $total_nilai)
+            // Cek tingkatan berdasarkan total nilai
+            $tingkatan = Tingkatan::where('nilai_min', '<=', $total_nilai)
                 ->where('nilai_max', '>=', $total_nilai)
                 ->first();
 
@@ -267,8 +291,7 @@ class PenilaianKaryaController extends Controller
             $penilaianKarya->update(['tingkatan_id' => $tingkatan->id]);
 
             if ($penilaianKarya->regisIndividu_id) {
-                $senimanId = DB::table('registrasi_individus')
-                    ->where('id', $penilaianKarya->regisIndividu_id)
+                $senimanId = RegistrasiIndividu::where('id', $penilaianKarya->regisIndividu_id)
                     ->value('seniman_id');
 
                 if ($senimanId) {
@@ -283,12 +306,14 @@ class PenilaianKaryaController extends Controller
                 'message' => 'Data has been updated successfully.',
                 'data' => $penilaianKarya,
             ], 200);
+
         } catch (\Illuminate\Database\QueryException $e) {
             return response()->json(['error' => 'Database error: ' . $e->getMessage()], 500);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Error: ' . $e->getMessage()], 500);
         }
     }
+
 
     public function show($id)
     {

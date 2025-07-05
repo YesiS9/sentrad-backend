@@ -615,6 +615,10 @@ class RegisterIndividuController extends Controller
                 ], 404);
             }
 
+            if ($individu->status_individu === 'Dalam Proses Penilaian') {
+                return response()->json(['status' => 'error', 'message' => 'Data sedang dalam proses penilaian, tidak dapat dihapus.'], 403);
+            }
+
             $register->delete();
 
             Log::info('Data Registrasi Individu Berhasil Dihapus');

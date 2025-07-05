@@ -624,6 +624,9 @@ class RegisterKelompokController extends Controller
                 ], 404);
             }
 
+            if ($register->status_kelompok === 'Dalam Proses Penilaian') {
+                return response()->json(['status' => 'error', 'message' => 'Data sedang dalam proses penilaian, tidak dapat dihapus.'], 403);
+            }
             if ($register->delete()) {
                 Log::info('Data Registrasi Kelompok Berhasil Dihapus');
                 return response()->json([

@@ -110,13 +110,12 @@ class RubrikController extends Controller
                 'bobot.required' => 'Bobot harus diisi.',
                 'bobot.numeric' => 'Bobot harus berupa angka.',
                 'bobot.gte' => 'Bobot tidak boleh kurang dari 0.',
-                'bobot.lte' => 'Bobot tidak boleh lebih dari 20.',
             ];
 
             $validator = Validator::make($request->all(), [
                 'nama_rubrik' => 'required|string|max:100|unique:rubriks',
                 'deskripsi_rubrik' => 'required|string',
-                'bobot' => 'required|numeric|gte:0|lte:20',
+                'bobot' => 'required|numeric|gte:0',
             ], $messages);
 
             if ($validator->fails()) {
@@ -210,13 +209,12 @@ class RubrikController extends Controller
                 'bobot.required' => 'Bobot harus diisi.',
                 'bobot.numeric' => 'Bobot harus berupa angka.',
                 'bobot.gte' => 'Bobot tidak boleh kurang dari 0.',
-                'bobot.lte' => 'Bobot tidak boleh lebih dari 20.',
             ];
 
             $validator = Validator::make($request->all(), [
                 'nama_rubrik' => 'required|string|max:100',
                 'deskripsi_rubrik' => 'required|string',
-                'bobot' => 'required|numeric|gte:0|lte:20',
+                'bobot' => 'required|numeric|gte:0',
             ], $messages);
 
             if ($validator->fails()) {
