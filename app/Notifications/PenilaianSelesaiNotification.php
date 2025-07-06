@@ -58,7 +58,8 @@ class PenilaianSelesaiNotification extends Notification
             ->line("Penilaian untuk registrasi {$this->tipe} Anda telah selesai.")
             ->line("Nama: {$nama}")
             ->action('Lihat Detail', url('/login'))
-            ->line('Terima kasih telah menggunakan website kami.');
+            ->line('Terima kasih telah menggunakan website kami.')
+            ->salutation('Salam, Tim Sentrad');
     }
 
 }

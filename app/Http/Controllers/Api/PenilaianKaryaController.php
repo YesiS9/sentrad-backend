@@ -140,11 +140,15 @@ class PenilaianKaryaController extends Controller
                 $total_bobot += $bobot;
             }
 
+            Log::info("Total Skor: " . $total_skor);
+            Log::info("Total Bobot: " . $total_bobot);
+
             if ($total_bobot <= 0) {
                 return response()->json(['error' => 'Total bobot tidak boleh 0.'], 400);
             }
 
             $total_nilai = ($total_skor / $total_bobot) * 100;
+            Log::info("Total Nilai (akhir): " . $total_nilai);
 
             $penilai = Penilai::find($validated['kuota_id']);
             $kuotaPenilai = KuotaPenilai::find($validated['kuota_id']);
