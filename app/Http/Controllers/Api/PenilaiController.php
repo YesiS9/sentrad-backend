@@ -387,7 +387,7 @@ class PenilaiController extends Controller
 
             $kuota = KuotaPenilai::create([
                 'penilai_id' => $penilaiId,
-                'bulan' => $bulan,
+                'periode_bulan' => $bulan,
                 'kuota' => $penilai->kuota,
                 'kuota_terpakai' => 0,
             ]);
