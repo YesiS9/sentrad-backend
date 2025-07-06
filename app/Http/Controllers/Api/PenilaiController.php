@@ -370,6 +370,36 @@ class PenilaiController extends Controller
         return response()->json(['total_penilais' => $totalPenilai]);
     }
 
+        public function cekAtauBuatKuota($penilaiId)
+    {
+        $bulan = now()->format('Y-m');
+
+        $kuota = KuotaPenilai::where('penilai_id', $penilaiId)
+            ->where('bulan', $bulan)
+            ->first();
+
+        if (!$kuota) {
+            $penilai = Penilai::find($penilaiId);
+
+            if (!$penilai) {
+                return response()->json(['error' => 'Penilai tidak ditemukan.'], 404);
+            }
+
+            $kuota = KuotaPenilai::create([
+                'penilai_id' => $penilaiId,
+                'bulan' => $bulan,
+                'kuota' => $penilai->kuota,
+                'kuota_terpakai' => 0,
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $kuota
+        ], 200);
+    }
+
+
 
 
 }
