@@ -268,7 +268,6 @@ class PenilaianKaryaController extends Controller
                 'tgl_penilaian' => now(),
             ]);
 
-            // Update rubrik penilaian
             foreach ($validated['rubrik_penilaians'] as $rubrikData) {
                 $rubrikId = Rubrik::where('nama_rubrik', $rubrikData['nama_rubrik'])->value('id');
 
@@ -283,7 +282,6 @@ class PenilaianKaryaController extends Controller
                 }
             }
 
-            // Cek tingkatan berdasarkan total nilai
             $tingkatan = Tingkatan::where('nilai_min', '<=', $total_nilai)
                 ->where('nilai_max', '>=', $total_nilai)
                 ->first();
@@ -334,7 +332,7 @@ class PenilaianKaryaController extends Controller
 
             $rubrikPenilaians = RubrikPenilaian::where('penilaian_karya_id', $penilaianKarya->id)
                 ->join('rubriks', 'rubrik_penilaians.rubrik_id', '=', 'rubriks.id')
-                ->select('rubriks.nama_rubrik', 'rubrik_penilaians.skor')
+                ->select('rubriks.nama_rubrik','rubriks.bobot', 'rubrik_penilaians.skor')
                 ->get();
 
             return response()->json([
