@@ -375,7 +375,7 @@ class PenilaiController extends Controller
         $bulan = now()->format('Y-m');
 
         $kuota = KuotaPenilai::where('penilai_id', $penilaiId)
-            ->where('bulan', $bulan)
+            ->where('periode_bulan', $bulan)
             ->first();
 
         if (!$kuota) {
