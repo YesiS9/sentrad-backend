@@ -20,6 +20,7 @@ class AuthController extends Controller{
     public function hash(Request $request){
         echo Hash::make($request->query('txt'));
     }
+
     public function register(Request $request)
     {
         try {
@@ -64,7 +65,6 @@ class AuthController extends Controller{
                     }
                 }
 
-
                 $user = User::create([
                     'username' => $request->username,
                     'email' => $request->email,
@@ -76,6 +76,8 @@ class AuthController extends Controller{
                     'user_id' => $user->id,
                     'role_id' => $role->id,
                 ]);
+
+                $user->photo_url = $this->getPhotoUrl($user->foto);
 
                 event(new Registered($user));
                 $user->sendEmailVerificationNotification();
