@@ -15,11 +15,22 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class AuthController extends Controller{
     public function hash(Request $request){
         echo Hash::make($request->query('txt'));
     }
+
+    private function getPhotoUrl($photoPath)
+    {
+        if (!$photoPath || $photoPath === 'profil_user/user.jpg') {
+            return null;
+        }
+
+        return url('storage/' . $photoPath);
+    }
+
 
     public function register(Request $request)
     {
@@ -51,48 +62,44 @@ class AuthController extends Controller{
             ], $messages);
 
             if ($validator->fails()) {
-                return response()->json($validator->errors(), 400);
-            }
-
-            try {
-                $role = Role::where('nama_role', 'seniman')->firstOrFail();
-
-                $fotoPath = 'profil_user/user.jpg';
-                if ($request->hasFile('foto')) {
-                    $file = $request->file('foto');
-                    if ($file->isValid()) {
-                        $fotoPath = $file->store('profil_user', 'public');
-                    }
-                }
-
-                $user = User::create([
-                    'username' => $request->username,
-                    'email' => $request->email,
-                    'password' => Hash::make($request->password),
-                    'foto' => $fotoPath,
-                ]);
-
-                UserRole::create([
-                    'user_id' => $user->id,
-                    'role_id' => $role->id,
-                ]);
-
-                $user->photo_url = $this->getPhotoUrl($user->foto);
-
-                event(new Registered($user));
-                $user->sendEmailVerificationNotification();
-
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'User registered successfully. Please check your email for verification.',
-                    'data' => $user,
-                ], 201);
-            } catch (\Exception $e) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Error during registration: ' . $e->getMessage(),
-                ], 500);
+                    'message' => $validator->errors(),
+                ], 422);
             }
+
+            $role = Role::where('nama_role', 'seniman')->firstOrFail();
+
+            $fotoPath = 'profil_user/user.jpg';
+            if ($request->hasFile('foto')) {
+                $file = $request->file('foto');
+                if ($file->isValid()) {
+                    $fotoPath = $file->store('profil_user', 'public');
+                }
+            }
+
+            $user = User::create([
+                'username' => $request->username,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'foto' => $fotoPath,
+            ]);
+
+            UserRole::create([
+                'user_id' => $user->id,
+                'role_id' => $role->id,
+            ]);
+
+            $user->photo_url = $this->getPhotoUrl($user->foto);
+
+            event(new \Illuminate\Auth\Events\Registered($user));
+            $user->sendEmailVerificationNotification();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'User registered successfully. Please check your email for verification.',
+                'data' => $user,
+            ], 201);
 
         } catch (\Exception $e) {
             Log::error('Exception Error: ' . $e->getMessage());
@@ -102,6 +109,7 @@ class AuthController extends Controller{
             ], 500);
         }
     }
+
 
 
 
