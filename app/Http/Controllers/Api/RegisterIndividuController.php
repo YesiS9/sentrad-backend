@@ -342,7 +342,7 @@ class RegisterIndividuController extends Controller
                 ], 404);
             }
 
-            if ($storeData['nama'] !== $seniman->nama_seniman) {
+            if (strcasecmp($storeData['nama'], $seniman->nama_seniman) !== 0) {
                 Log::error('Nama tidak sesuai dengan nama_seniman: ' . $storeData['nama']);
                 return response()->json([
                     'data' => null,
