@@ -615,6 +615,7 @@ class RegisterIndividuController extends Controller
     {
         try {
             $register = RegistrasiIndividu::find($id);
+
             if (!$register) {
                 Log::info('Data Registrasi Individu tidak ditemukan');
                 return response()->json([
@@ -624,8 +625,12 @@ class RegisterIndividuController extends Controller
                 ], 404);
             }
 
-            if ($individu->status_individu === 'Dalam Proses Penilaian') {
-                return response()->json(['status' => 'error', 'message' => 'Data sedang dalam proses penilaian, tidak dapat dihapus.'], 403);
+            // Gunakan $register, bukan $individu
+            if ($register->status_individu === 'Dalam Proses Penilaian') {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Data sedang dalam proses penilaian, tidak dapat dihapus.'
+                ], 403);
             }
 
             $register->delete();
@@ -641,10 +646,11 @@ class RegisterIndividuController extends Controller
             return response()->json([
                 'data' => null,
                 'status' => 'error',
-                'message' => $e->getMessage()
+                'message' => 'Terjadi kesalahan pada server: ' . $e->getMessage()
             ], 500);
         }
     }
+
 
     public function getTotalIndividu()
     {
