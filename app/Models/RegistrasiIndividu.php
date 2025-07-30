@@ -39,10 +39,9 @@ class RegistrasiIndividu extends Model
         parent::boot();
 
         static::updated(function ($registrasi) {
-            // Cek apakah `status_individu` berubah menjadi 'Penilaian Selesai'
             if ($registrasi->isDirty('status_individu') && $registrasi->status_individu === 'Penilaian Selesai') {
-                $seniman = $registrasi->seniman; // Relasi ke seniman
-                if ($seniman && $seniman->user) { // Pastikan ada user terkait
+                $seniman = $registrasi->seniman;
+                if ($seniman && $seniman->user) {
                     $seniman->user->notify(new PenilaianSelesaiNotification('individu', $registrasi));
                 }
             }
