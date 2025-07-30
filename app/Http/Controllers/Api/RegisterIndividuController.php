@@ -376,27 +376,36 @@ class RegisterIndividuController extends Controller
         }
     }
 
-
     public function show($id)
     {
-        $registrasiIndividu = RegistrasiIndividu::with('kategoriSeni')
+        try {
+            $registrasiIndividu = RegistrasiIndividu::with('kategoriSeni')
             ->where('id', $id)
             ->whereNull('deleted_at')
-            ->find($id);
+            ->first();
 
-        if ($registrasiIndividu) {
+            if (!$registrasiIndividu) {
+                return response()->json([
+                    'data' => null,
+                    'status' => 'error',
+                    'message' => 'Data Registrasi Individu tidak ditemukan',
+                ], 404);
+            }
+
             return response()->json([
+                'data' => $registrasiIndividu,
                 'status' => 'success',
-                'data' => $registrasiIndividu
-            ]);
+                'message' => 'Data Registrasi Individu Berhasil Ditampilkan',
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Exception Error: ' . $e->getMessage());
+            return response()->json([
+                'data' => null,
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ], 500);
         }
-
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Data not found'
-        ], 404);
     }
-
 
     public function showByAdmin($id)
     {

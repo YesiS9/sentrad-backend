@@ -338,7 +338,11 @@ class RegisterKelompokController extends Controller
     public function show($id)
     {
         try {
-            $register = RegistrasiKelompok::with('kategoriSeni')->where('id', $id)->whereNull('deleted_at')->find($id);
+            $register = RegistrasiKelompok::with('kategoriSeni')
+            ->where('id', $id)
+            ->whereNull('deleted_at')
+            ->first();
+            
             if (!$register) {
                 return response()->json([
                     'data' => null,
