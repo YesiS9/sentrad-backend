@@ -342,7 +342,7 @@ class RegisterKelompokController extends Controller
             ->where('id', $id)
             ->whereNull('deleted_at')
             ->first();
-            
+
             if (!$register) {
                 return response()->json([
                     'data' => null,
@@ -426,11 +426,11 @@ class RegisterKelompokController extends Controller
             }
 
 
-            if ($register->status_kelompok !== 'Pengajuan pendaftaran') {
+            if ($register->status_kelompok !== 'Pengajuan Pendaftaran') {
                 return response()->json([
                     'data' => null,
                     'status' => 'error',
-                    'message' => 'Data hanya bisa diubah jika status adalah "Pengajuan pendaftaran".',
+                    'message' => 'Data hanya bisa diubah jika status adalah "Pengajuan Pendaftaran".',
                 ], 400);
             }
 
