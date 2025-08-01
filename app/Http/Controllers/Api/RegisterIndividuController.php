@@ -625,7 +625,6 @@ class RegisterIndividuController extends Controller
                 ], 404);
             }
 
-            // Gunakan $register, bukan $individu
             if ($register->status_individu === 'Dalam Proses Penilaian') {
                 return response()->json([
                     'status' => 'error',
