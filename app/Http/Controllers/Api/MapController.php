@@ -108,10 +108,8 @@ class MapController extends Controller
     public function destroy($id)
     {
         try {
-            // Find the location by ID
             $location = Map::find($id);
 
-            // Check if the location exists
             if (!$location) {
                 Log::error('Data Lokasi Tidak Ditemukan');
                 return response()->json([
@@ -120,7 +118,6 @@ class MapController extends Controller
                 ], 404);
             }
 
-            // Delete the location
             if ($location->delete()) {
                 Log::info('Data Lokasi Berhasil Dihapus');
                 return response()->json([
