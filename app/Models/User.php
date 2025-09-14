@@ -36,7 +36,9 @@ class User extends Authenticatable implements MustVerifyEmail
         parent::boot();
 
         static::created(function ($user) {
-            $user->notify(new \App\Notifications\VerifyEmailNotification());
+            if (!request()->is('*/store-byAdmin') && !app()->runningInConsole()) {
+                $user->notify(new \App\Notifications\VerifyEmailNotification());
+            }
         });
     }
 
