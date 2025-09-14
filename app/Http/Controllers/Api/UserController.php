@@ -70,7 +70,10 @@ class UserController extends Controller
 
     public function storeByAdmin(Request $request)
     {
+
         try {
+            \Log::info('Auth middleware passed, user authenticated');
+            \Log::info('Authenticated user:', auth('api')->user());
             $messages = [
                 'username.required' => 'Username wajib diisi.',
                 'username.unique' => 'Username telah dipakai.',
