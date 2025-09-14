@@ -72,8 +72,6 @@ class UserController extends Controller
     {
 
         try {
-            \Log::info('Auth middleware passed, user authenticated');
-            \Log::info('Authenticated user:', auth('api')->user());
             $messages = [
                 'username.required' => 'Username wajib diisi.',
                 'username.unique' => 'Username telah dipakai.',
