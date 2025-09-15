@@ -10,38 +10,20 @@ class PenilaianSelesaiNotification extends Notification
 {
     use Queueable;
 
-    protected $tipe; // tipe registrasi (individu/kelompok)
-    protected $registrasi; // data registrasi
+    protected $tipe;
+    protected $registrasi;
 
-    /**
-     * Constructor
-     *
-     * @param string $tipe
-     * @param \App\Models\RegistrasiIndividu|\App\Models\RegistrasiKelompok $registrasi
-     */
     public function __construct($tipe, $registrasi)
     {
         $this->tipe = $tipe;
         $this->registrasi = $registrasi;
     }
 
-    /**
-     * Define channels for notification delivery.
-     *
-     * @param mixed $notifiable
-     * @return array
-     */
     public function via($notifiable)
     {
-        return ['mail']; // Menggunakan kanal email
+        return ['mail'];
     }
 
-    /**
-     * Build the mail representation of the notification.
-     *
-     * @param mixed $notifiable
-     * @return \Illuminate\Notifications\Messages\MailMessage
-     */
     public function toMail($notifiable)
     {
         if ($this->tipe === 'individu') {
@@ -52,14 +34,15 @@ class PenilaianSelesaiNotification extends Notification
             $subject = 'Penilaian Registrasi Kelompok Selesai';
         }
 
+        $recipientName = $notifiable->name ?? 'User';
+
         return (new MailMessage)
             ->subject($subject)
-            ->greeting("Halo, {$notifiable->name}")
+            ->greeting("Halo, {$recipientName}") 
             ->line("Penilaian untuk registrasi {$this->tipe} Anda telah selesai.")
             ->line("Nama: {$nama}")
             ->action('Lihat Detail', url('/login'))
             ->line('Terima kasih telah menggunakan website kami.')
             ->salutation('Salam, Tim Sentrad');
     }
-
 }
