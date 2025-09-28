@@ -55,7 +55,7 @@ class AuthController extends Controller{
                 'foto.max' => 'Ukuran foto maksimal adalah 200 MB.',
             ];
 
-            $validator = Validator::make($inputData, [
+            $validator = Validator::make($request->all(), [
                 'username' => 'required|string|max:255|unique:users',
                 'email' => 'required|string|email|max:255|unique:users',
                 'password' => 'required|string|min:8|confirmed',
@@ -70,19 +70,10 @@ class AuthController extends Controller{
                 ], 422);
             }
 
-
-            try {
-                $role = Role::where('nama_role', 'seniman')->first();
-                if (!$role) {
-                    Log::warning('Role seniman not found, will create user without role');
-                }
-            } catch (\Exception $e) {
-                Log::error('Error finding role: ' . $e->getMessage());
-                $role = null;
+            $role = Role::where('nama_role', 'seniman')->first();
+            if (!$role) {
+                Log::warning('Role seniman not found');
             }
-
-            $fotoPath = 'profil_user/user.jpg';
-
 
             $fotoPath = 'profil_user/user.jpg';
             if ($request->hasFile('foto')) {
@@ -90,6 +81,7 @@ class AuthController extends Controller{
                 if ($file->isValid()) {
                     try {
                         $fotoPath = $file->store('profil_user', 'public');
+                        Log::info('Photo uploaded successfully: ' . $fotoPath);
                     } catch (\Exception $e) {
                         Log::error('Photo upload failed: ' . $e->getMessage());
                     }
@@ -97,9 +89,9 @@ class AuthController extends Controller{
             }
 
             $user = User::create([
-                'username' => $inputData['username'],
-                'email' => $inputData['email'],
-                'password' => Hash::make($inputData['password']),
+                'username' => $request->username,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
                 'foto' => $fotoPath,
             ]);
 
