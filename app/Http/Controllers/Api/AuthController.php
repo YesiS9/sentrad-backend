@@ -18,7 +18,9 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class AuthController extends Controller{
-    public function hash(Request $request){
+
+    public function hash(Request $request)
+    {
         echo Hash::make($request->query('txt'));
     }
 
@@ -30,7 +32,6 @@ class AuthController extends Controller{
 
         return url('storage/' . $photoPath);
     }
-
 
     public function register(Request $request)
     {
@@ -54,7 +55,7 @@ class AuthController extends Controller{
                 'foto.max' => 'Ukuran foto maksimal adalah 200 MB.',
             ];
 
-            $validator = Validator::make($request->all(), [
+            $validator = Validator::make($inputData, [
                 'username' => 'required|string|max:255|unique:users',
                 'email' => 'required|string|email|max:255|unique:users',
                 'password' => 'required|string|min:8|confirmed',
@@ -64,54 +65,98 @@ class AuthController extends Controller{
             if ($validator->fails()) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => $validator->errors(),
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors(),
                 ], 422);
             }
 
-            $role = Role::where('nama_role', 'seniman')->firstOrFail();
+
+            try {
+                $role = Role::where('nama_role', 'seniman')->first();
+                if (!$role) {
+                    Log::warning('Role seniman not found, will create user without role');
+                }
+            } catch (\Exception $e) {
+                Log::error('Error finding role: ' . $e->getMessage());
+                $role = null;
+            }
+
+            $fotoPath = 'profil_user/user.jpg';
+
 
             $fotoPath = 'profil_user/user.jpg';
             if ($request->hasFile('foto')) {
                 $file = $request->file('foto');
                 if ($file->isValid()) {
-                    $fotoPath = $file->store('profil_user', 'public');
+                    try {
+                        $fotoPath = $file->store('profil_user', 'public');
+                    } catch (\Exception $e) {
+                        Log::error('Photo upload failed: ' . $e->getMessage());
+                    }
                 }
             }
 
             $user = User::create([
-                'username' => $request->username,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
+                'username' => $inputData['username'],
+                'email' => $inputData['email'],
+                'password' => Hash::make($inputData['password']),
                 'foto' => $fotoPath,
             ]);
 
-            UserRole::create([
-                'user_id' => $user->id,
-                'role_id' => $role->id,
-            ]);
+            Log::info('User created successfully: ' . $user->id);
+
+            if ($role) {
+                try {
+                    UserRole::create([
+                        'user_id' => $user->id,
+                        'role_id' => $role->id,
+                    ]);
+                    Log::info('UserRole created successfully');
+                } catch (\Exception $e) {
+                    Log::error('Error creating UserRole: ' . $e->getMessage());
+                }
+            }
 
             $user->photo_url = $this->getPhotoUrl($user->foto);
 
-            event(new \Illuminate\Auth\Events\Registered($user));
-            $user->sendEmailVerificationNotification();
+            try {
+                event(new \Illuminate\Auth\Events\Registered($user));
+                $user->sendEmailVerificationNotification();
+                $emailMessage = ' Please check your email for verification.';
+            } catch (\Exception $e) {
+                Log::error('Email verification failed: ' . $e->getMessage());
+                $emailMessage = ' Email verification unavailable at the moment.';
+            }
+
+            $token = base64_encode($user->id . '|' . now()->timestamp . '|' . $user->email);
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'User registered successfully. Please check your email for verification.',
-                'data' => $user,
+                'message' => 'User registered successfully.' . $emailMessage,
+                'data' => [
+                    'id' => $user->id,
+                    'username' => $user->username,
+                    'email' => $user->email,
+                    'foto' => $user->foto,
+                    'photo_url' => $user->photo_url,
+                ],
+                'token' => $token,
             ], 201);
 
         } catch (\Exception $e) {
             Log::error('Exception Error: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+
             return response()->json([
                 'status' => 'error',
                 'message' => 'Error during registration: ' . $e->getMessage(),
+                'debug' => [
+                    'file' => basename($e->getFile()),
+                    'line' => $e->getLine(),
+                ]
             ], 500);
         }
     }
-
-
-
 
 
     public function login(Request $request)
